@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>889</width>
-    <height>861</height>
+    <width>1022</width>
+    <height>867</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -74,7 +74,7 @@
            <widget class="QDateEdit" name="doa_daddit">
             <property name="dateTime">
              <datetime>
-              <hour>6</hour>
+              <hour>3</hour>
               <minute>0</minute>
               <second>0</second>
               <year>2023</year>
@@ -98,7 +98,7 @@
            <widget class="QDateEdit" name="dod_daddit">
             <property name="dateTime">
              <datetime>
-              <hour>6</hour>
+              <hour>3</hour>
               <minute>0</minute>
               <second>0</second>
               <year>2023</year>
@@ -318,7 +318,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>889</width>
+     <width>1022</width>
      <height>22</height>
     </rect>
    </property>

@@ -29,6 +29,7 @@ class Ui_LoginWindow(object):
         self.pswd_lbl.setObjectName("pswd_lbl")
         self.gridLayout_2.addWidget(self.pswd_lbl, 2, 0, 1, 1)
         self.usr_leddit = QtWidgets.QLineEdit(parent=self.frame)
+        self.usr_leddit.setText("")
         self.usr_leddit.setObjectName("usr_leddit")
         self.gridLayout_2.addWidget(self.usr_leddit, 1, 1, 1, 1)
         self.usr_lbl = QtWidgets.QLabel(parent=self.frame)
@@ -36,8 +37,9 @@ class Ui_LoginWindow(object):
         self.gridLayout_2.addWidget(self.usr_lbl, 1, 0, 1, 1)
         self.pswd_leddit = QtWidgets.QLineEdit(parent=self.frame)
         self.pswd_leddit.setInputMask("")
+        self.pswd_leddit.setText("")
         self.pswd_leddit.setEchoMode(QtWidgets.QLineEdit.EchoMode.Password)
-        self.pswd_leddit.setCursorPosition(6)
+        self.pswd_leddit.setCursorPosition(0)
         self.pswd_leddit.setObjectName("pswd_leddit")
         self.gridLayout_2.addWidget(self.pswd_leddit, 2, 1, 1, 1)
         self.frame_3 = QtWidgets.QFrame(parent=self.frame)
@@ -81,9 +83,7 @@ class Ui_LoginWindow(object):
         _translate = QtCore.QCoreApplication.translate
         LoginWindow.setWindowTitle(_translate("LoginWindow", "Welcome"))
         self.pswd_lbl.setText(_translate("LoginWindow", "Password"))
-        self.usr_leddit.setText(_translate("LoginWindow", "hotel_admin"))
         self.usr_lbl.setText(_translate("LoginWindow", "User name"))
-        self.pswd_leddit.setText(_translate("LoginWindow", "batman"))
         self.welcome_lbl.setText(_translate("LoginWindow", "Welcome to the Hotelier decktop app! Please log in."))
         self.submit_btn.setText(_translate("LoginWindow", "Submit"))
 

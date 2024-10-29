@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>859</width>
-    <height>567</height>
+    <width>1011</width>
+    <height>649</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -183,16 +183,16 @@
            </widget>
           </item>
           <item>
-           <widget class="QPushButton" name="newRes_btn">
+           <widget class="QPushButton" name="report_btn">
             <property name="text">
-             <string>New reservation</string>
+             <string>Form a report</string>
             </property>
            </widget>
           </item>
           <item>
-           <widget class="QPushButton" name="report_btn">
+           <widget class="QPushButton" name="newRes_btn">
             <property name="text">
-             <string>Form a report</string>
+             <string>New reservation</string>
             </property>
            </widget>
           </item>
@@ -213,7 +213,7 @@
           <item>
            <widget class="QPushButton" name="rest_btn">
             <property name="text">
-             <string>Reinstate reservation</string>
+             <string>Reinstate</string>
             </property>
            </widget>
           </item>
@@ -273,7 +273,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>859</width>
+     <width>1011</width>
      <height>22</height>
     </rect>
    </property>

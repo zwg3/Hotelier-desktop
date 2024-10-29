@@ -244,7 +244,6 @@ def show_total_rate(form):
             form.create_btn.setEnabled(True)
 
     form.total_lbl.setText(f"Total cost of stay: {total}")
-    # update_table_rate(form)
 
 
 def populate_cbox(request_string, cbox, request_arg=None):
@@ -560,7 +559,8 @@ def populate_room_id_cbx(form):
     ON rooms.id = rgm.room_id
     JOIN reservations AS r
     ON r.id = rgm.reservation_id
-    WHERE (r.date_arrival, r.date_departure) 
+    WHERE r.is_cancelled != true 
+    AND (r.date_arrival, r.date_departure) 
     OVERLAPS (%s, %s))
     AND id != ALL(%s::int[]);"""
     populate_cbox(request, form.rmNum_cbx, [room_type, arrival, departure, reserved_id])
@@ -585,6 +585,7 @@ def del_rm(form):
     if table.rowCount() <= 0:
         form.doa_daddit.setEnabled(True)
         form.dod_daddit.setEnabled(True)
+
     show_total_rate(form)
     populate_room_id_cbx(form)
     validate_room_capacity(form)
@@ -651,6 +652,7 @@ def set_current_date(form):
     today = QDate(int(y), int(m), int(d))
     form.doa_daddit.setDate(today)
     form.dod_daddit.setDate(today)
+    form.doa_daddit.setMinimumDate(today)
 
 
 def show_new_res_window():
@@ -715,28 +717,32 @@ def show_res_details():
     for row in range(details_table.rowCount()):
         details_table.removeRow(row)
     reservations_table = reservations_ui.data_twidget
-    res_id = str(reservations_table.item(reservations_table.currentRow(), 0).text())
-    keys = [
-        "ID",
-        "Arrival",
-        "Departure",
-        "First name",
-        "Last name",
-        "Room category",
-        "Room id"
-    ]
-    request = """
-    SELECT DISTINCT r.id, r.date_arrival, r.date_departure, g.first_name, g.last_name, rm.name, rm.id
-    FROM reservations_guests_rooms AS rgm
-    JOIN reservations AS r
-    ON rgm.reservation_id = r.id
-    JOIN guests AS g
-    ON rgm.guest_id = g.id
-    JOIN rooms AS rm
-    ON rgm.room_id = rm.id
-    WHERE r.id = %s;"""
-    populate_table(request, details_table, keys, [res_id])
-    details_window.show()
+    res_id = reservations_table.item(reservations_table.currentRow(), 0)
+    if res_id:
+        res_id = str(res_id.text())
+        keys = [
+            "ID",
+            "Arrival",
+            "Departure",
+            "First name",
+            "Last name",
+            "Room category",
+            "Room id"
+        ]
+        request = """
+        SELECT DISTINCT r.id, r.date_arrival, r.date_departure, g.first_name, g.last_name, rm.name, rm.id
+        FROM reservations_guests_rooms AS rgm
+        JOIN reservations AS r
+        ON rgm.reservation_id = r.id
+        JOIN guests AS g
+        ON rgm.guest_id = g.id
+        JOIN rooms AS rm
+        ON rgm.room_id = rm.id
+        WHERE r.id = %s;"""
+        populate_table(request, details_table, keys, [res_id])
+        details_table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
+        details_table.horizontalHeader().setSectionResizeMode(0, QHeaderView.ResizeMode.ResizeToContents)
+        details_window.show()
 
 
 def show_add_guest_window():

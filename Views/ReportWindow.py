@@ -12,7 +12,7 @@ from PyQt6 import QtCore, QtGui, QtWidgets
 class Ui_ReportWindow(object):
     def setupUi(self, ReportWindow):
         ReportWindow.setObjectName("ReportWindow")
-        ReportWindow.resize(800, 600)
+        ReportWindow.resize(1000, 600)
         self.centralwidget = QtWidgets.QWidget(parent=ReportWindow)
         self.centralwidget.setObjectName("centralwidget")
         self.horizontalLayout_2 = QtWidgets.QHBoxLayout(self.centralwidget)
@@ -64,7 +64,7 @@ class Ui_ReportWindow(object):
         self.horizontalLayout_2.addWidget(self.frame)
         ReportWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtWidgets.QMenuBar(parent=ReportWindow)
-        self.menubar.setGeometry(QtCore.QRect(0, 0, 800, 22))
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 1000, 22))
         self.menubar.setObjectName("menubar")
         ReportWindow.setMenuBar(self.menubar)
         self.statusbar = QtWidgets.QStatusBar(parent=ReportWindow)

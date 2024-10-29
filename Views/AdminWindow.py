@@ -12,7 +12,7 @@ from PyQt6 import QtCore, QtGui, QtWidgets
 class Ui_AdminWindow(object):
     def setupUi(self, AdminWindow):
         AdminWindow.setObjectName("AdminWindow")
-        AdminWindow.resize(338, 278)
+        AdminWindow.resize(266, 266)
         self.centralwidget = QtWidgets.QWidget(parent=AdminWindow)
         self.centralwidget.setObjectName("centralwidget")
         self.verticalLayout_2 = QtWidgets.QVBoxLayout(self.centralwidget)
@@ -35,7 +35,7 @@ class Ui_AdminWindow(object):
         self.verticalLayout_2.addWidget(self.frame)
         AdminWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtWidgets.QMenuBar(parent=AdminWindow)
-        self.menubar.setGeometry(QtCore.QRect(0, 0, 338, 22))
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 266, 22))
         self.menubar.setObjectName("menubar")
         AdminWindow.setMenuBar(self.menubar)
         self.statusbar = QtWidgets.QStatusBar(parent=AdminWindow)
