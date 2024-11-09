@@ -200,7 +200,11 @@ def save_rate(form):
             data.append(text)
     total = 0
     for i in data:
-        total += float(i)
+        if check_int(i):
+            total += float(i)
+        else:
+            pop_up_ui.popup_txt.setText("Please use integers only for rate fields")
+            pop_up_widget.show()
     avg_rate = round(total / table.columnCount())
     form.rate_leddit.setText(str(avg_rate))
     if table2.item(0, 8):
@@ -336,6 +340,12 @@ def validate_stay(form):
         form.stay_lbl.setStyleSheet("color: black")
 
 
+def check_int(s):
+    if s[0] in ('-', '+'):
+        return s[1:].isdigit()
+    return s.isdigit()
+
+
 def search():
     request = """SELECT DISTINCT on (rgm.reservation_id)
                     rgm.reservation_id, g.first_name, g.last_name, rm.name, r.date_arrival, r.date_departure, 
@@ -363,40 +373,50 @@ def search():
             "Commentary"]
     if len(reservations_ui.id_leddit.text().strip()) > 0:
         arg = reservations_ui.id_leddit.text()
-        request = """SELECT DISTINCT on (rgm.reservation_id)
-                        rgm.reservation_id, g.first_name, g.last_name, rm.name,  r.date_arrival, r.date_departure, 
-                        r.is_cancelled, pm.name, r.total_cost, r.commentary
-                        FROM reservations AS r
-                        JOIN reservations_guests_rooms as rgm
-                        ON rgm.reservation_id = r.id
-                        JOIN guests AS g
-                        ON g.id = rgm.guest_id
-                        JOIN rooms as rm
-                        ON rm.id = rgm.room_id
-                        JOIN payment_methods AS pm
-                        ON pm.id = r.payment_method
-                        WHERE r.id = %s;
-                        """
-        reservations_ui.id_leddit.clear()
-        populate_table(request, table, keys, [arg])
+        if check_int(arg):
+            request = """SELECT DISTINCT on (rgm.reservation_id)
+                            rgm.reservation_id, g.first_name, g.last_name, rm.name,  r.date_arrival, r.date_departure, 
+                            r.is_cancelled, pm.name, r.total_cost, r.commentary
+                            FROM reservations AS r
+                            JOIN reservations_guests_rooms as rgm
+                            ON rgm.reservation_id = r.id
+                            JOIN guests AS g
+                            ON g.id = rgm.guest_id
+                            JOIN rooms as rm
+                            ON rm.id = rgm.room_id
+                            JOIN payment_methods AS pm
+                            ON pm.id = r.payment_method
+                            WHERE r.id = %s;
+                            """
+            reservations_ui.id_leddit.clear()
+            populate_table(request, table, keys, [arg])
+        else:
+            pop_up_ui.popup_txt.setText("Please use integer values only")
+            pop_up_widget.show()
+            reservations_ui.id_leddit.clear()
     elif len(reservations_ui.lname_leddit.text().strip()) > 0:
         arg = reservations_ui.lname_leddit.text()
-        request = """SELECT DISTINCT on (rgm.reservation_id)
-                        rgm.reservation_id, g.first_name, g.last_name, rm.name,  r.date_arrival, r.date_departure, 
-                        r.is_cancelled, pm.name, r.total_cost, r.commentary
-                        FROM reservations AS r
-                        JOIN reservations_guests_rooms as rgm
-                        ON rgm.reservation_id = r.id
-                        JOIN guests AS g
-                        ON g.id = rgm.guest_id
-                        JOIN rooms as rm
-                        ON rm.id = rgm.room_id
-                        JOIN payment_methods AS pm
-                        ON pm.id = r.payment_method
-                        WHERE g.last_name = %s;
-                        """
-        populate_table(request, table, keys, [arg])
-        reservations_ui.lname_leddit.clear()
+        if check_int(arg):
+            pop_up_ui.popup_txt.setText("Please use letters only")
+            pop_up_widget.show()
+            reservations_ui.lname_leddit.clear()
+        else:
+            request = """SELECT DISTINCT on (rgm.reservation_id)
+                            rgm.reservation_id, g.first_name, g.last_name, rm.name,  r.date_arrival, r.date_departure, 
+                            r.is_cancelled, pm.name, r.total_cost, r.commentary
+                            FROM reservations AS r
+                            JOIN reservations_guests_rooms as rgm
+                            ON rgm.reservation_id = r.id
+                            JOIN guests AS g
+                            ON g.id = rgm.guest_id
+                            JOIN rooms as rm
+                            ON rm.id = rgm.room_id
+                            JOIN payment_methods AS pm
+                            ON pm.id = r.payment_method
+                            WHERE g.last_name = %s;
+                            """
+            populate_table(request, table, keys, [arg])
+            reservations_ui.lname_leddit.clear()
     elif len(reservations_ui.doa_deddit.text().strip()) > 0:
         arg = reservations_ui.doa_deddit.text()
         request = """SELECT DISTINCT on (rgm.reservation_id)
@@ -433,13 +453,16 @@ def add_user():
     email = form.email_leddit.text()
     phone = form.phone_leddit.text()
     date_added = datetime.now()
+    if login != '' and pswd !='' and fname != '' and lname != '' and email != '' and phone != '':
+        cursor.execute("""INSERT INTO users(login, password, first_name, last_name, e_mail, phone, date_added, role_id)
+                          VALUES(%s, %s, %s, %s, %s, %s, %s, %s)""",
+                       [login, pswd, fname, lname, email, phone, date_added, 3])
 
-    cursor.execute("""INSERT INTO users(login, password, first_name, last_name, e_mail, phone, date_added, role_id)
-                      VALUES(%s, %s, %s, %s, %s, %s, %s, %s)""",
-                   [login, pswd, fname, lname, email, phone, date_added, 3])
-
-    conn.commit()
-    add_usr_window.close()
+        conn.commit()
+        add_usr_window.close()
+    else:
+        pop_up_ui.popup_txt.setText("Please fill out all fields")
+        pop_up_widget.show()
 
 
 def populate_lbl(request, lbl, request_arg=None, beginning_string="", ending_string=""):
@@ -630,20 +653,24 @@ def get_selected_data(form):
     room_type = form.roomtype_cbox.currentText()
     room_id = form.rmNum_cbx.currentText()
     payment_method = form.payment_cbx.currentText()
-    total_cost = str((float(get_stay_period(form))) * (float(form.rate_leddit.text())))
-    col_values = [guest_id, arrival, departure, first_name, last_name, room_type, room_id, payment_method, total_cost]
-    row = table2.rowCount()
-    table2.insertRow(row)
-    for column in range(table2.columnCount()):
-        item = col_values[column]
-        table2.setItem(row, column, QTableWidgetItem(item))
-        table2.item(row, column).setTextAlignment(Qt.AlignmentFlag.AlignCenter)
-    guest_select_window.close()
-    form.doa_daddit.setEnabled(False)
-    form.dod_daddit.setEnabled(False)
-    show_total_rate(form)
-    populate_room_id_cbx(form)
-    validate_room_capacity(form)
+    if check_int(form.rate_leddit.text()):
+        total_cost = str((float(get_stay_period(form))) * (float(form.rate_leddit.text())))
+        col_values = [guest_id, arrival, departure, first_name, last_name, room_type, room_id, payment_method, total_cost]
+        row = table2.rowCount()
+        table2.insertRow(row)
+        for column in range(table2.columnCount()):
+            item = col_values[column]
+            table2.setItem(row, column, QTableWidgetItem(item))
+            table2.item(row, column).setTextAlignment(Qt.AlignmentFlag.AlignCenter)
+        guest_select_window.close()
+        form.doa_daddit.setEnabled(False)
+        form.dod_daddit.setEnabled(False)
+        show_total_rate(form)
+        populate_room_id_cbx(form)
+        validate_room_capacity(form)
+    else:
+        pop_up_ui.popup_txt.setText("Please use integers only for rate field")
+        pop_up_widget.show()
 
 
 def set_current_date(form):
@@ -760,65 +787,69 @@ def show_edit_res_window():
     edit_form = edit_reservation_ui
     res_form = reservations_ui
     res_table = res_form.data_twidget
-    res_id = res_table.item(res_table.currentRow(), 0).text()
-    edit_table = edit_form.resRms_twidget
-    doa = res_table.item(res_table.currentRow(), 4).text()
-    dod = res_table.item(res_table.currentRow(), 5).text()
-    qdate = format_qdate(doa)
-    edit_form.doa_daddit.setDate(qdate)
-    qdate = format_qdate(dod)
-    edit_form.dod_daddit.setDate(qdate)
-    arrival = datetime.strptime(doa, '%Y-%m-%d').date()
-    departure = datetime.strptime(dod, '%Y-%m-%d').date()
-    total_cost = float(res_table.item(res_table.currentRow(), 8).text())
-    diff = (departure - arrival).days
-    edit_form.rate_leddit.setText(str(total_cost / diff))
-    edit_form.resId_lbl.setText(res_id)
-    edit_form.resId_lbl.hide()
-    edit_form.doa_daddit.setEnabled(False)
-    edit_form.dod_daddit.setEnabled(False)
-    edit_form.rmNum_cbx.clear()
-    edit_form.payment_cbx.clear()
-    edit_form.roomtype_cbox.clear()
+    if res_table.item(res_table.currentRow(), 0):
+        res_id = res_table.item(res_table.currentRow(), 0).text()
+        edit_table = edit_form.resRms_twidget
+        doa = res_table.item(res_table.currentRow(), 4).text()
+        dod = res_table.item(res_table.currentRow(), 5).text()
+        qdate = format_qdate(doa)
+        edit_form.doa_daddit.setDate(qdate)
+        qdate = format_qdate(dod)
+        edit_form.dod_daddit.setDate(qdate)
+        arrival = datetime.strptime(doa, '%Y-%m-%d').date()
+        departure = datetime.strptime(dod, '%Y-%m-%d').date()
+        total_cost = float(res_table.item(res_table.currentRow(), 8).text())
+        diff = (departure - arrival).days
+        edit_form.rate_leddit.setText(str(total_cost / diff))
+        edit_form.resId_lbl.setText(res_id)
+        edit_form.resId_lbl.hide()
+        edit_form.doa_daddit.setEnabled(False)
+        edit_form.dod_daddit.setEnabled(False)
+        edit_form.rmNum_cbx.clear()
+        edit_form.payment_cbx.clear()
+        edit_form.roomtype_cbox.clear()
 
-    populate_cbox("SELECT name FROM payment_methods;", edit_form.payment_cbx)
-    populate_cbox("SELECT DISTINCT name FROM rooms;", edit_form.roomtype_cbox)
+        populate_cbox("SELECT name FROM payment_methods;", edit_form.payment_cbx)
+        populate_cbox("SELECT DISTINCT name FROM rooms;", edit_form.roomtype_cbox)
 
-    res_keys = [
-        "Guest ID",
-        "Arrival",
-        "Departure",
-        "First name",
-        "Last name",
-        "Room type",
-        "Room ID",
-        "Payment Method",
-        "Total cost"
-    ]
+        res_keys = [
+            "Guest ID",
+            "Arrival",
+            "Departure",
+            "First name",
+            "Last name",
+            "Room type",
+            "Room ID",
+            "Payment Method",
+            "Total cost"
+        ]
 
-    request = """SELECT g.id, r.date_arrival, r.date_departure, g.first_name, g.last_name, rm.name, rm.id,
-                pm.name, r.total_cost
-                FROM reservations_guests_rooms AS rgm
-                JOIN reservations AS r
-                ON rgm.reservation_id = r.id
-                JOIN guests AS g
-                ON rgm.guest_id = g.id
-                JOIN rooms AS rm
-                ON rgm.room_id = rm.id
-                JOIN payment_methods AS pm
-                ON pm.id = r.payment_method
-                WHERE r.id = %s;"""
-    populate_table(request, edit_table, res_keys, [res_id])
-    edit_table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
-    edit_table.horizontalHeader().setSectionResizeMode(0, QHeaderView.ResizeMode.ResizeToContents)
-    for row in range(1, edit_table.rowCount()):
-        edit_table.setItem(row, 8, QTableWidgetItem('0'))
-        edit_table.item(row, 8).setTextAlignment(Qt.AlignmentFlag.AlignCenter)
+        request = """SELECT g.id, r.date_arrival, r.date_departure, g.first_name, g.last_name, rm.name, rm.id,
+                    pm.name, r.total_cost
+                    FROM reservations_guests_rooms AS rgm
+                    JOIN reservations AS r
+                    ON rgm.reservation_id = r.id
+                    JOIN guests AS g
+                    ON rgm.guest_id = g.id
+                    JOIN rooms AS rm
+                    ON rgm.room_id = rm.id
+                    JOIN payment_methods AS pm
+                    ON pm.id = r.payment_method
+                    WHERE r.id = %s;"""
+        populate_table(request, edit_table, res_keys, [res_id])
+        edit_table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
+        edit_table.horizontalHeader().setSectionResizeMode(0, QHeaderView.ResizeMode.ResizeToContents)
+        for row in range(1, edit_table.rowCount()):
+            edit_table.setItem(row, 8, QTableWidgetItem('0'))
+            edit_table.item(row, 8).setTextAlignment(Qt.AlignmentFlag.AlignCenter)
 
-    edit_form.comment_leddit.setText(res_table.item(res_table.currentRow(), 9).text())
-    show_total_rate(edit_form)
-    populate_room_id_cbx(edit_form)
-    edit_reservation_window.show()
+        edit_form.comment_leddit.setText(res_table.item(res_table.currentRow(), 9).text())
+        show_total_rate(edit_form)
+        populate_room_id_cbx(edit_form)
+        edit_reservation_window.show()
+    else:
+        pop_up_ui.popup_txt.setText("PLease select a reservation")
+        pop_up_widget.show()
 
 
 def clear_table(table):
@@ -845,34 +876,38 @@ def create_reservation():
         if guest_id and room_id:
             guests_rooms_id.append([str(guest_id.text()), str(room_id.text())])
 
-    cursor.execute("""INSERT INTO reservations(date_arrival, date_departure, total_cost, payment_method, commentary,
-                   is_cancelled, created_by, last_update_by)
-                   VALUES (
-                   %s, %s,
-                   %s, %s,
-                   %s, %s,
-                   %s, %s);""",
-                   [arrival, departure,
-                    cost, payment_id,
-                    reservation_comment, cancelled,
-                    created_by, created_by]
-                   )
-    conn.commit()
-
-    cursor.execute("""SELECT id FROM reservations
-                    ORDER BY id DESC
-                    LIMIT 1;""")
-
-    new_res_id = cursor.fetchall()[0][0]
-
-    for item in range(len(guests_rooms_id)):
-        cursor.execute("""
-                        INSERT INTO reservations_guests_rooms (reservation_id, guest_id, room_id)
-                        VALUES( %s, %s, %s);""", [new_res_id, guests_rooms_id[item][0], guests_rooms_id[item][1]]
+    if len(guests_rooms_id) <= 0:
+        pop_up_ui.popup_txt.setText("Please add at least one guest")
+        pop_up_widget.show()
+    else:
+        cursor.execute("""INSERT INTO reservations(date_arrival, date_departure, total_cost, payment_method, commentary,
+                       is_cancelled, created_by, last_update_by)
+                       VALUES (
+                       %s, %s,
+                       %s, %s,
+                       %s, %s,
+                       %s, %s);""",
+                       [arrival, departure,
+                        cost, payment_id,
+                        reservation_comment, cancelled,
+                        created_by, created_by]
                        )
         conn.commit()
-    show_reservation_window()
-    new_res_window.close()
+
+        cursor.execute("""SELECT id FROM reservations
+                        ORDER BY id DESC
+                        LIMIT 1;""")
+
+        new_res_id = cursor.fetchall()[0][0]
+
+        for item in range(len(guests_rooms_id)):
+            cursor.execute("""
+                            INSERT INTO reservations_guests_rooms (reservation_id, guest_id, room_id)
+                            VALUES( %s, %s, %s);""", [new_res_id, guests_rooms_id[item][0], guests_rooms_id[item][1]]
+                           )
+            conn.commit()
+        show_reservation_window()
+        new_res_window.close()
 
 
 def update_reservation():
